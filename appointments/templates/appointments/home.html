@@ -1,0 +1,28 @@
+{% extends "appointments/base.html" %}
+
+{% block title %}Car Doctor{% endblock %}
+
+{% block content %}
+<div class="container text-center my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1 class="display-4 mb-4">The Best Doctor for Your Car</h1>
+            <p class="lead mb-5">
+                At Car Doctor, we provide top-notch automotive care with certified mechanics 
+                and state-of-the-art equipment. Whether it's routine maintenance or complex 
+                repairs, your vehicle is in expert hands. We pride ourselves on honest 
+                diagnostics and transparent pricing.
+            </p>
+            
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a href="/book" class="btn btn-primary btn-lg px-4 gap-3">
+                    <i class="bi bi-calendar-plus"></i> Book Appointment
+                </a>
+                <a href="/login" class="btn btn-outline-secondary btn-lg px-4">
+                    <i class="bi bi-shield-lock"></i> Admin Access Only
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

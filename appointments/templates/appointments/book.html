@@ -1,0 +1,144 @@
+{% extends "appointments/base.html" %}
+
+{% block title %}Book Appointment - Car Doctor{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0"><i class="bi bi-calendar-plus me-2"></i>Book Service Appointment</h2>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                                <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="id_name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="id_name" name="name" required>
+                                <div class="invalid-feedback">Please enter your name</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="id_phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="id_phone" name="phone" required>
+                                <div class="invalid-feedback">Please enter a valid phone number</div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label for="id_address" class="form-label">Address</label>
+                                <textarea class="form-control" id="id_address" name="address" rows="2" required></textarea>
+                                <div class="invalid-feedback">Please enter your address</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="id_car_license" class="form-label">Car License Plate</label>
+                                <input type="text" class="form-control" id="id_car_license" name="car_license" required>
+                                <div class="invalid-feedback">Please enter your car license</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="id_engine_number" class="form-label">Engine Number</label>
+                                <input type="text" class="form-control" id="id_engine_number" name="engine_number" required>
+                                <div class="invalid-feedback">Please enter engine number</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="id_mechanic" class="form-label">Preferred Mechanic</label>
+                                <select class="form-select" id="id_mechanic" name="mechanic" required>
+                                    <option value="" selected disabled>Select mechanic</option>
+                                    {% for mechanic in mechanics %}
+                                        <option value="{{ mechanic.id }}">{{ mechanic.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">Please select a mechanic</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="id_appointment_date" class="form-label">Appointment Date</label>
+                                <input type="date" class="form-control" id="id_appointment_date" name="appointment_date" required>
+                                <div class="invalid-feedback">Please select a date</div>
+                            </div>
+                            
+                            <div class="col-12 mt-4">
+                                <button class="btn btn-primary btn-lg w-100" type="submit">
+                                    <i class="bi bi-bookmark-check me-2"></i>Book Appointment
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <div id="availability" class="alert alert-success mt-3 d-flex align-items-center" style="display: none;">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <span id="availability-text"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('id_appointment_date').min = today;
+        
+        
+        updateAvailability();
+    });
+
+    function updateAvailability() {
+        const mechanic = document.getElementById("id_mechanic").value;
+        const date = document.getElementById("id_appointment_date").value;
+    
+        if (mechanic && date) {
+            fetch(`/availability/?mechanic_id=${mechanic}&date=${date}`)
+                .then(response => response.json())
+                .then(data => {
+                    const availabilityEl = document.getElementById("availability");
+                    const textEl = document.getElementById("availability-text");
+                    
+                    if (data.available_slots !== undefined) {
+                        availabilityEl.style.display = 'flex';
+                        availabilityEl.className = data.available_slots > 0 ? 
+                            'alert alert-success mt-3 d-flex align-items-center' : 
+                            'alert alert-warning mt-3 d-flex align-items-center';
+                        
+                        textEl.innerText = data.available_slots > 0 ?
+                            `${data.available_slots} available slot(s) for selected date` :
+                            'No available slots for selected date/mechanic';
+                    }
+                });
+        }
+    }
+
+    document.getElementById("id_mechanic").addEventListener("change", updateAvailability);
+    document.getElementById("id_appointment_date").addEventListener("change", updateAvailability);
+
+    
+    (function () {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+{% endblock %}
