@@ -1,26 +1,62 @@
-{% extends "appointments/base.html" %}
-
-{% block title %}Car Doctor{% endblock %}
+{% extends 'appointments/base.html' %}
 
 {% block content %}
-<div class="container text-center my-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <h1 class="display-4 mb-4">The Best Doctor for Your Car</h1>
-            <p class="lead mb-5">
-                At Car Doctor, we provide top-notch automotive care with certified mechanics 
-                and state-of-the-art equipment. Whether it's routine maintenance or complex 
-                repairs, your vehicle is in expert hands. We pride ourselves on honest 
-                diagnostics and transparent pricing.
-            </p>
+<div class="container">
+    <div class="jumbotron text-center my-4">
+        <h1 class="display-4">Welcome to Car Doctor</h1>
+        <p class="lead">Your trusted partner for professional car maintenance and repair</p>
+        <hr class="my-4">
+        <p>At Car Doctor, we provide expert mechanical services with state-of-the-art equipment and certified mechanics. Schedule your appointment today and experience the difference!</p>
+        
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Customer Login</h5>
+                        <p class="card-text">Book or manage your car service appointments</p>
+                        <a href="{% url 'user_login' %}" class="btn btn-primary btn-lg">Customer Login</a>
+                    </div>
+                </div>
+            </div>
             
-            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                <a href="/book" class="btn btn-primary btn-lg px-4 gap-3">
-                    <i class="bi bi-calendar-plus"></i> Book Appointment
-                </a>
-                <a href="/login" class="btn btn-outline-secondary btn-lg px-4">
-                    <i class="bi bi-shield-lock"></i> Admin Access Only
-                </a>
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title">Admin Login</h5>
+                        <p class="card-text">Staff access for appointment management</p>
+                        <a href="{% url 'admin_login' %}" class="btn btn-secondary btn-lg">Admin Login</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <i class="fas fa-tools fa-3x mb-3 text-primary"></i>
+                    <h3>Expert Mechanics</h3>
+                    <p>Our certified mechanics have years of experience with all car makes and models.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-3x mb-3 text-primary"></i>
+                    <h3>Quick Service</h3>
+                    <p>We value your time and strive to provide efficient and timely service.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt fa-3x mb-3 text-primary"></i>
+                    <h3>Quality Guarantee</h3>
+                    <p>All our repairs come with a satisfaction guarantee for your peace of mind.</p>
+                </div>
             </div>
         </div>
     </div>

@@ -1,65 +1,162 @@
-{% extends "appointments/base.html" %}
+{% extends 'appointments/base.html' %}
 
-{% block title %}Admin Panel - Appointments{% endblock %}
+{% block extra_nav %}
+<ul class="navbar-nav ml-auto">
+    <li class="nav-item">
+        <a class="nav-link btn btn-outline-danger" href="{% url 'admin_logout' %}">Logout</a>
+    </li>
+</ul>
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0"><i class="bi bi-speedometer2 me-2"></i>Admin Dashboard</h2>
-        <a href="{% url 'logout' %}" class="btn btn-outline-danger">
-            <i class="bi bi-box-arrow-left me-1"></i>Logout
-        </a>
-    </div>
-
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Appointment Management</h5>
+<div class="container-fluid">
+    <h1 class="mt-4 mb-4">Admin Panel</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table mr-1"></i>
+            Appointments
         </div>
-        <div class="card-body table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Client</th>
-                        <th>Phone</th>
-                        <th>Car License</th>
-                        <th>Date</th>
-                        <th>Mechanic</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for appt in appointments %}
-                    <tr>
-                        <td>{{ appt.client.name }}</td>
-                        <td>{{ appt.client.phone }}</td>
-                        <td><span class="badge bg-secondary">{{ appt.client.car_license }}</span></td>
-                        <td>{{ appt.date }}</td>
-                        <td>{{ appt.mechanic.name }}</td>
-                        <td>
-                            <form method="post" action="{% url 'update_appointment' appt.id %}" class="row g-2">
-                                {% csrf_token %}
-                                <div class="col-md-5">
-                                    <input type="date" name="new_date" value="{{ appt.date }}" class="form-control form-control-sm">
-                                </div>
-                                <div class="col-md-5">
-                                    <select name="new_mechanic" class="form-select form-select-sm">
-                                        {% for mech in mechanics %}
-                                            <option value="{{ mech.id }}" {% if mech == appt.mechanic %}selected{% endif %}>{{ mech.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <button class="btn btn-sm btn-primary w-100" type="submit">
-                                        <i class="bi bi-check-lg"></i>
-                                    </button>
-                                </div>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="appointmentsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Phone</th>
+                            <th>Car License</th>
+                            <th>Engine Number</th>
+                            <th>Mechanic</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in appointments %}
+                        <tr>
+                            <td>{{ appointment.client.decrypted_name }}</td>
+                            <td>{{ appointment.client.decrypted_phone }}</td>
+                            <td>{{ appointment.client.decrypted_car_license }}</td>
+                            <td>{{ appointment.client.decrypted_engine_number }}</td>
+                            <td>{{ appointment.mechanic.name }}</td>
+                            <td>{{ appointment.date }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm edit-btn" data-id="{{ appointment.id }}" data-toggle="modal" data-target="#editModal">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Appointment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="new_date">New Date</label>
+                        <input type="date" class="form-control" id="new_date" name="new_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_mechanic">New Mechanic</label>
+                        <select class="form-control" id="new_mechanic" name="new_mechanic" required>
+                            {% for mechanic in mechanics %}
+                                <option value="{{ mechanic.id }}">{{ mechanic.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="availability-info" class="alert alert-info d-none">
+                        Available slots: <span id="available-slots">4</span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveChanges">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        $('#appointmentsTable').DataTable();
+        
+        let currentAppointmentId;
+        
+        $('.edit-btn').click(function() {
+            currentAppointmentId = $(this).data('id');
+        });
+        
+        $('#new_date, #new_mechanic').change(function() {
+            const date = $('#new_date').val();
+            const mechanicId = $('#new_mechanic').val();
+            
+            if (date && mechanicId) {
+                $.ajax({
+                    url: '{% url "check_availability" %}',
+                    data: {
+                        'date': date,
+                        'mechanic_id': mechanicId
+                    },
+                    success: function(data) {
+                        $('#availability-info').removeClass('d-none');
+                        $('#available-slots').text(data.available_slots);
+                        
+                        if (data.available_slots <= 0) {
+                            $('#availability-info').removeClass('alert-info').addClass('alert-danger');
+                        } else {
+                            $('#availability-info').removeClass('alert-danger').addClass('alert-info');
+                        }
+                    }
+                });
+            }
+        });
+        
+        $('#saveChanges').click(function() {
+            const newDate = $('#new_date').val();
+            const newMechanic = $('#new_mechanic').val();
+            
+            $.ajax({
+                url: `/update/${currentAppointmentId}/`,
+                method: 'POST',
+                data: {
+                    'new_date': newDate,
+                    'new_mechanic': newMechanic
+                },
+                success: function() {
+                    location.reload();
+                },
+                error: function(xhr) {
+                    alert(xhr.responseJSON.error || 'An error occurred');
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}
